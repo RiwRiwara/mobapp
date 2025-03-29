@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.booking
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.mobileappcar.ui.screens.service.ServiceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

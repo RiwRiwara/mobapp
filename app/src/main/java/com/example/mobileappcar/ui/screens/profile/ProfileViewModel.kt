@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.profile
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
-    private val apiRepository = ApiRepository.getInstance()
+    private val apiRepository = ApiRepository()
 
     private val _userState = MutableStateFlow<UserState>(UserState.Loading)
     val userState: StateFlow<UserState> = _userState
@@ -20,7 +20,6 @@ class ProfileViewModel : ViewModel() {
         data class Success(val user: User) : UserState()
         data class Error(val message: String) : UserState()
     }
-
     init {
         fetchUserProfile()
     }

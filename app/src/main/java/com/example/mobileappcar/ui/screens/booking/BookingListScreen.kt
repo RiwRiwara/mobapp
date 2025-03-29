@@ -1,10 +1,12 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.booking
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,6 +22,21 @@ import com.example.mobileappcar.ui.components.BookingItem
 fun BookingListScreen(navController: NavHostController, modifier: Modifier = Modifier) {
     val viewModel: BookingListViewModel = viewModel()
     val bookingsState = viewModel.bookingsState.collectAsState()
+
+// Get the refresh signal from savedStateHandle
+    val refreshSignal = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getStateFlow<Boolean>("refresh", false)
+        ?.collectAsState(initial = false)
+
+    // Refresh bookings when the signal changes to true
+    LaunchedEffect(refreshSignal) {
+        if (refreshSignal?.value == true) {
+            viewModel.fetchBookings()
+            // Reset the signal after refreshing
+            navController.currentBackStackEntry?.savedStateHandle?.set("refresh", false)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -63,7 +80,13 @@ fun BookingListScreen(navController: NavHostController, modifier: Modifier = Mod
                         items(state.bookings) { booking ->
                             BookingItem(
                                 booking = booking,
-                                onClick = { navController.navigate("bookingDetail/${booking.id}") }
+                                onClick = {
+                                    if (booking.id > 0) {
+                                        navController.navigate("bookingDetail/${booking.id}")
+                                    } else {
+                                        Log.e("BookingListScreen", "Invalid booking ID: ${booking.id}")
+                                    }
+                                }
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                         }

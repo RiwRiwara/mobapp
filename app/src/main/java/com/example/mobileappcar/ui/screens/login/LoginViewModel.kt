@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.login
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
-    private val apiRepository = ApiRepository.getInstance()
+    private val apiRepository = ApiRepository()
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState

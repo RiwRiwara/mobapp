@@ -1,5 +1,5 @@
 //com/example/mobileappcar/ui/screens/RegisterScreen.kt
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.register
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions

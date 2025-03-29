@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.service
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ServiceViewModel : ViewModel() {
-    private val apiRepository = ApiRepository.getInstance()
+    private val apiRepository = ApiRepository()
 
     private val _servicesState = MutableStateFlow<ServicesState>(ServicesState.Loading)
     val servicesState: StateFlow<ServicesState> = _servicesState

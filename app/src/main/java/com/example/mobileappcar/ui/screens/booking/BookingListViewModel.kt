@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.booking
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class BookingListViewModel : ViewModel() {
-    private val apiRepository = ApiRepository.getInstance()
+    private val apiRepository = ApiRepository()
 
     private val _bookingsState = MutableStateFlow<BookingsState>(BookingsState.Loading)
     val bookingsState: StateFlow<BookingsState> = _bookingsState
@@ -29,7 +29,7 @@ class BookingListViewModel : ViewModel() {
         viewModelScope.launch {
             _bookingsState.value = BookingsState.Loading
             Log.d("BookingListViewModel", "Fetching bookings")
-            val result = apiRepository.getBookings()
+            val result: Result<List<Booking>> = apiRepository.getBookings() // Explicitly type result// Explicitly type result
             result.onSuccess { bookings ->
                 Log.i("BookingListViewModel", "API fetched ${bookings.size} bookings")
                 _bookingsState.value = BookingsState.Success(bookings)

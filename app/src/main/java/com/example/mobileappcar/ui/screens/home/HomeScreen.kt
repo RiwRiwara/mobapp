@@ -1,5 +1,5 @@
 //com/example/mobileappcar/ui/screens/HomeScreen.kt
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button

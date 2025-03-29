@@ -1,4 +1,4 @@
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.register
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

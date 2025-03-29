@@ -1,5 +1,5 @@
 //com/example/mobileappcar/ui/screens/ProfileScreen.kt
-package com.example.mobileappcar.ui.screens
+package com.example.mobileappcar.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.mobileappcar.data.repository.ApiRepository
+import com.example.mobileappcar.ui.navigation.NavRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,11 +68,11 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifie
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "Phone: ${user.phone}",
+                            text = "Phone: ${user.phone ?: "Not provided"}", // Handle null phone
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = "Joined: ${user.createdAt}",
+                            text = "Joined: ${user.createdAt ?: "Unknown"}", // Handle null createdAt
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -80,7 +82,8 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifie
 
                 Button(
                     onClick = {
-                        navController.navigate("login") {
+                        ApiRepository.clearAuthToken() // Clear token on logout
+                        navController.navigate(NavRoutes.Login) { // Use route name consistently
                             popUpTo(navController.graph.startDestinationId) { inclusive = true }
                         }
                     },
@@ -93,7 +96,32 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier = Modifie
                 }
             }
             is ProfileViewModel.UserState.Error -> {
-                Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = state.message ?: "An error occurred",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.fetchUserProfile() }, // Retry button
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Retry")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            ApiRepository.clearAuthToken()
+                            navController.navigate(NavRoutes.Login) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Login Again")
+                    }
+                }
             }
         }
     }
