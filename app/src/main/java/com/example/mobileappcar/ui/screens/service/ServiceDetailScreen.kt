@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,12 +37,24 @@ fun ServiceDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
+                    // Dynamically set the title based on the service name
                     when (val state = servicesState.value) {
                         is ServiceViewModel.ServicesState.Success -> {
                             val service = state.services.find { it.id == serviceId }
-                            Text(service?.name ?: "Service Detail")
+                            Text(
+                                text = service?.name ?: "Loading...",
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                            )
                         }
-                        else -> Text("Service Detail")
+                        else -> Text("Loading...")
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
