@@ -1,9 +1,11 @@
 package com.example.mobileappcar.ui.screens.service
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +24,12 @@ fun ServiceDetailScreen(
 ) {
     val viewModel: ServiceViewModel = viewModel()
     val servicesState = viewModel.servicesState.collectAsState()
+    val availableTimesState = viewModel.availableTimesState.collectAsState()
+    var selectedTime by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(serviceId) {
+        viewModel.fetchAvailableTimes(serviceId)
+    }
 
     Scaffold(
         topBar = {
@@ -67,18 +75,55 @@ fun ServiceDetailScreen(
                             text = "Price: ${service.price} THB",
                             style = MaterialTheme.typography.bodyMedium
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Available Times Selection
                         Text(
-                            text = "Duration: ${service.duration} mins",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = "Select a Time",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        when (val timesState = availableTimesState.value) {
+                            is ServiceViewModel.AvailableTimesState.Loading -> {
+                                CircularProgressIndicator()
+                            }
+                            is ServiceViewModel.AvailableTimesState.Success -> {
+                                LazyColumn(
+                                    modifier = Modifier.heightIn(max = 200.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(timesState.availableTimes) { time ->
+                                        TimeItem(
+                                            time = time,
+                                            isSelected = selectedTime == time,
+                                            onSelect = { selectedTime = time }
+                                        )
+                                    }
+                                }
+                            }
+                            is ServiceViewModel.AvailableTimesState.Error -> {
+                                Text(
+                                    text = "Error loading times: ${timesState.message}",
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                navController.navigate(NavRoutes.BookingConfirm.replace("{serviceId}", serviceId.toString()))
+                                selectedTime?.let { time ->
+                                    navController.navigate(
+                                        NavRoutes.BookingConfirm
+                                            .replace("{serviceId}", serviceId.toString())
+                                            .replace("{time}", time)
+                                    )
+                                }
                             },
+                            enabled = selectedTime != null,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Confirm")
+                            Text("Confirm Booking")
                         }
                     } else {
                         Text("Service not found", color = MaterialTheme.colorScheme.error)
@@ -92,6 +137,38 @@ fun ServiceDetailScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun TimeItem(
+    time: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RadioButton(
+                selected = isSelected,
+                onClick = { onSelect() }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = time,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

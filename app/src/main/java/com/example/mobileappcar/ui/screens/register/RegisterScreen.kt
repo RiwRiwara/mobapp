@@ -1,4 +1,3 @@
-//com/example/mobileappcar/ui/screens/RegisterScreen.kt
 package com.example.mobileappcar.ui.screens.register
 
 import androidx.compose.foundation.layout.*
@@ -20,6 +19,7 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
     val viewModel: RegisterViewModel = viewModel()
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -45,7 +45,20 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
             onValueChange = { username = it },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = username.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = email.isBlank() && registerState is RegisterViewModel.RegisterState.Error
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -56,7 +69,8 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = password.isBlank() && registerState is RegisterViewModel.RegisterState.Error
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -66,7 +80,8 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
             onValueChange = { firstName = it },
             label = { Text("First Name") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = firstName.isBlank() && registerState is RegisterViewModel.RegisterState.Error
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -76,7 +91,8 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
             onValueChange = { lastName = it },
             label = { Text("Last Name") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = lastName.isBlank() && registerState is RegisterViewModel.RegisterState.Error
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -87,14 +103,19 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
             label = { Text("Phone Number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
+            isError = phone.isBlank() && registerState is RegisterViewModel.RegisterState.Error
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                viewModel.register(username, password, firstName, lastName, phone)
+                if (username.isNotBlank() && password.isNotBlank() && email.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank() && phone.isNotBlank()) {
+                    viewModel.register(username, password, email, firstName, lastName, phone)
+                } else {
+                    viewModel.setError("All fields are required.")
+                }
             },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = registerState !is RegisterViewModel.RegisterState.Loading
@@ -119,7 +140,11 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
         when (val state = registerState) {
             is RegisterViewModel.RegisterState.Error -> {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = state.message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
             is RegisterViewModel.RegisterState.Success -> {
                 LaunchedEffect(state) {

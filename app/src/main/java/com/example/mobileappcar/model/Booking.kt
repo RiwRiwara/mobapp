@@ -6,15 +6,13 @@ data class Booking(
     val id: Int,
     @SerializedName("user_id") val userId: Int,
     @SerializedName("service_id") val serviceId: Int,
-    val date: String,
-    val time: String,
+    val time: String, // Changed from time_slot_id, date, and time fields
     val status: String,
     @SerializedName("payment_id") val paymentId: Int? = null,
     val note: String? = null,
     @SerializedName("created_at") val createdAt: String,
-    @SerializedName("service_name") val serviceName: String? = null, // Nullable to handle missing data
+    @SerializedName("service_name") val serviceName: String? = null,
     val price: Float? = null,
-    val duration: Int? = null,
     val amount: Float? = null,
     @SerializedName("payment_status") val paymentStatus: String? = null,
     @SerializedName("payment_method") val paymentMethod: String? = null,

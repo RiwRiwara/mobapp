@@ -96,6 +96,10 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
         apiService.getServices()
     }
 
+    suspend fun getAvailableTimes(serviceId: Int): Result<List<String>> = apiCall {
+        apiService.getAvailableTimes(serviceId)
+    }
+
     suspend fun getBookings(): Result<List<Booking>> = authenticatedApiCall { token ->
         apiService.getBookings(token)
     }
@@ -106,11 +110,10 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
 
     suspend fun createBooking(
         serviceId: Int,
-        date: String,
         time: String,
         note: String? = null
     ): Result<Booking> = authenticatedApiCall { token ->
-        val request = BookingRequest(serviceId, date, time, note)
+        val request = BookingRequest(serviceId, time, note)
         apiService.createBooking(token, request)
     }
 
@@ -135,6 +138,7 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
             Log.d("ApiRepository", "Payment response: $payment")
         }
     }
+
     suspend fun getCurrentUser(): Result<User> = authenticatedApiCall { token ->
         Log.d("ApiRepository", "Fetching current user with token: $token")
         apiService.getCurrentUser(token).also { user ->

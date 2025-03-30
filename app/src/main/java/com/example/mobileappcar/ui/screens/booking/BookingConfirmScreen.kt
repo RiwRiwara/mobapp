@@ -1,6 +1,9 @@
 package com.example.mobileappcar.ui.screens.booking
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,99 +20,130 @@ import com.example.mobileappcar.ui.screens.service.ServiceViewModel
 fun BookingConfirmScreen(
     navController: NavHostController,
     serviceId: Int,
+    time: String? = null, // Updated from timeSlotId to time string
     modifier: Modifier = Modifier
 ) {
     val viewModel: ServiceViewModel = viewModel()
     val bookingState = viewModel.bookingState.collectAsState()
-
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
+    val availableTimesState = viewModel.availableTimesState.collectAsState()
+    var selectedTime by remember { mutableStateOf<String?>(time) } // Pre-select time if passed
     var note by remember { mutableStateOf("") }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Confirm Your Booking",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            fontSize = 24.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
+    // Fetch available times when screen loads
+    LaunchedEffect(serviceId) {
+        viewModel.fetchAvailableTimes(serviceId)
+    }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = date,
-            onValueChange = { date = it },
-            label = { Text("Date (YYYY-MM-DD)") },
-            modifier = Modifier.fillMaxWidth(),
-            isError = date.isNotEmpty() && !date.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$"))
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = time,
-            onValueChange = { time = it },
-            label = { Text("Time (HH:MM)") },
-            modifier = Modifier.fillMaxWidth(),
-            isError = time.isNotEmpty() && !time.matches(Regex("^([01]\\d|2[0-3]):([0-5]\\d)$"))
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = note,
-            onValueChange = { note = it },
-            label = { Text("Note (optional)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (date.matches(Regex("^\\d{4}-\\d{2}-\\d{2}$")) &&
-                    time.matches(Regex("^([01]\\d|2[0-3]):([0-5]\\d)$"))
-                ) {
-                    viewModel.createBooking(serviceId, date, time, if (note.isBlank()) null else note)
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = date.isNotEmpty() && time.isNotEmpty()
-        ) {
-            Text("Confirm Booking")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Confirm Your Booking") }
+            )
         }
+    ) { paddingValues ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Confirm Your Booking",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                fontSize = 24.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        when (val state = bookingState.value) {
-            is ServiceViewModel.BookingState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is ServiceViewModel.BookingState.Success -> {
-                Text(
-                    text = "Booking Confirmed! ID: ${state.booking.id}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                LaunchedEffect(state) {
-                    navController.navigate("bookings") {
-                        popUpTo("services") { inclusive = false }
+            // Available Times Selection
+            Text(
+                text = "Select a Time",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            when (val state = availableTimesState.value) {
+                is ServiceViewModel.AvailableTimesState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is ServiceViewModel.AvailableTimesState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 200.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.availableTimes) { availableTime ->
+                            TimeItem(
+                                time = availableTime,
+                                isSelected = selectedTime == availableTime,
+                                onSelect = { selectedTime = availableTime }
+                            )
+                        }
                     }
                 }
+                is ServiceViewModel.AvailableTimesState.Error -> {
+                    Text(
+                        text = "Error loading times: ${state.message}",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
-            is ServiceViewModel.BookingState.Error -> {
-                Text(
-                    text = "Error: ${state.message}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error
-                )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Note Input
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text("Note (optional)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Confirm Button
+            Button(
+                onClick = {
+                    selectedTime?.let { time ->
+                        viewModel.createBooking(serviceId, time, if (note.isBlank()) null else note)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = selectedTime != null
+            ) {
+                Text("Confirm Booking")
             }
-            is ServiceViewModel.BookingState.Idle -> {}
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Booking State Feedback
+            when (val state = bookingState.value) {
+                is ServiceViewModel.BookingState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                is ServiceViewModel.BookingState.Success -> {
+                    Text(
+                        text = "Booking Confirmed! ID: ${state.booking.id}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    LaunchedEffect(state) {
+                        navController.navigate("bookings") {
+                            popUpTo("services") { inclusive = false }
+                        }
+                    }
+                }
+                is ServiceViewModel.BookingState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                is ServiceViewModel.BookingState.Idle -> {}
+            }
         }
     }
 }
+

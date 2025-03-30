@@ -37,33 +37,22 @@ fun BookingItem(booking: Booking, onClick: () -> Unit = {}) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Date: ${booking.date} ${booking.time}",
+                    text = "Time: ${booking.time}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Service ID: ${booking.serviceId}",
+                    text = "Created: ${booking.createdAt}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Service: ${booking.serviceName ?: "Unknown"}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            // Status Chip
-            Surface(
-                shape = MaterialTheme.shapes.small,
-                color = when (booking.status.lowercase()) {
-                    "completed" -> MaterialTheme.colorScheme.primary
-                    "pending" -> MaterialTheme.colorScheme.secondary
-                    "cancelled" -> MaterialTheme.colorScheme.error
-                    else -> MaterialTheme.colorScheme.primary
-                }
-            ) {
-                Text(
-                    text = booking.status,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+
         }
     }
 }

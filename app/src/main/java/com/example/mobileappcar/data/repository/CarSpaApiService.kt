@@ -1,15 +1,6 @@
 package com.example.mobileappcar.data.repository
 
-import com.example.mobileappcar.model.Booking
-import com.example.mobileappcar.model.BookingRequest
-import com.example.mobileappcar.model.LoginRequest
-import com.example.mobileappcar.model.Payment
-import com.example.mobileappcar.model.PaymentRequest
-import com.example.mobileappcar.model.RegisterRequest
-import com.example.mobileappcar.model.Service
-import com.example.mobileappcar.model.UpdateBookingRequest
-import com.example.mobileappcar.model.User
-import com.example.mobileappcar.model.UserResponse
+import com.example.mobileappcar.model.*
 import retrofit2.http.*
 
 interface CarSpaApiService {
@@ -21,6 +12,9 @@ interface CarSpaApiService {
 
     @GET("api/services")
     suspend fun getServices(): List<Service>
+
+    @GET("api/services/{id}/times")
+    suspend fun getAvailableTimes(@Path("id") serviceId: Int): List<String>
 
     @GET("api/bookings")
     suspend fun getBookings(@Header("Authorization") token: String): List<Booking>

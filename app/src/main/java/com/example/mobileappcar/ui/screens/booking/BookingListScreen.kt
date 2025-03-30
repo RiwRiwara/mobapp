@@ -23,7 +23,7 @@ fun BookingListScreen(navController: NavHostController, modifier: Modifier = Mod
     val viewModel: BookingListViewModel = viewModel()
     val bookingsState = viewModel.bookingsState.collectAsState()
 
-// Get the refresh signal from savedStateHandle
+    // Get the refresh signal from savedStateHandle
     val refreshSignal = navController.currentBackStackEntry
         ?.savedStateHandle
         ?.getStateFlow<Boolean>("refresh", false)
@@ -82,7 +82,7 @@ fun BookingListScreen(navController: NavHostController, modifier: Modifier = Mod
                                 booking = booking,
                                 onClick = {
                                     if (booking.id > 0) {
-                                        navController.navigate("bookingDetail/${booking.id}")
+                                        navController.navigate("payment/${booking.id}")
                                     } else {
                                         Log.e("BookingListScreen", "Invalid booking ID: ${booking.id}")
                                     }

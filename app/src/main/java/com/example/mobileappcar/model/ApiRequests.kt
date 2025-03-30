@@ -13,13 +13,12 @@ data class LoginRequest(
     val password: String
 )
 
+
 data class BookingRequest(
     val service_id: Int,
-    val date: String,
     val time: String,
     val note: String? = null
 )
-
 data class UpdateBookingRequest(
     val status: String
 )

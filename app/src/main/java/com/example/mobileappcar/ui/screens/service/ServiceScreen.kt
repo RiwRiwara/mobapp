@@ -33,7 +33,6 @@ fun ServiceScreen(navController: NavHostController, modifier: Modifier = Modifie
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Header
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,7 +140,7 @@ fun EnhancedServiceCard(service: Service, navController: NavHostController) {
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "฿${service.price} • ${service.duration} mins",
+                            text = "฿${service.price}",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -149,7 +148,7 @@ fun EnhancedServiceCard(service: Service, navController: NavHostController) {
                 }
                 Button(
                     onClick = {
-                        navController.navigate(NavRoutes.BookingConfirm.replace("{serviceId}", service.id.toString()))
+                        navController.navigate(NavRoutes.ServiceDetail.replace("{serviceId}", service.id.toString()))
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)

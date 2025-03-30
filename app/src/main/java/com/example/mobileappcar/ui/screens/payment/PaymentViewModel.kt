@@ -22,11 +22,11 @@ class PaymentViewModel : ViewModel() {
         data class Error(val message: String) : PaymentState()
     }
 
-    fun createPayment(bookingId: Int, amount: Float, paymentMethod: String) {
+    fun createPayment(bookingId: Int, amount: Float, paymentMethod: String, image: String? = null) {
         viewModelScope.launch {
             _paymentState.value = PaymentState.Loading
             Log.d("PaymentViewModel", "Creating payment for booking ID: $bookingId")
-            val result = apiRepository.createPayment(bookingId, amount, paymentMethod)
+            val result = apiRepository.createPayment(bookingId, amount, paymentMethod, null, image)
             result.onSuccess { payment ->
                 Log.i("PaymentViewModel", "Payment created successfully: ${payment.id}")
                 _paymentState.value = PaymentState.Success(payment)

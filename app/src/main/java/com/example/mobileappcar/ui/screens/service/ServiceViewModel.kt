@@ -16,6 +16,9 @@ class ServiceViewModel : ViewModel() {
     private val _servicesState = MutableStateFlow<ServicesState>(ServicesState.Loading)
     val servicesState: StateFlow<ServicesState> = _servicesState
 
+    private val _availableTimesState = MutableStateFlow<AvailableTimesState>(AvailableTimesState.Loading)
+    val availableTimesState: StateFlow<AvailableTimesState> = _availableTimesState
+
     private val _bookingState = MutableStateFlow<BookingState>(BookingState.Idle)
     val bookingState: StateFlow<BookingState> = _bookingState
 
@@ -23,6 +26,12 @@ class ServiceViewModel : ViewModel() {
         object Loading : ServicesState()
         data class Success(val services: List<Service>) : ServicesState()
         data class Error(val message: String) : ServicesState()
+    }
+
+    sealed class AvailableTimesState {
+        object Loading : AvailableTimesState()
+        data class Success(val availableTimes: List<String>) : AvailableTimesState()
+        data class Error(val message: String) : AvailableTimesState()
     }
 
     sealed class BookingState {
@@ -51,11 +60,32 @@ class ServiceViewModel : ViewModel() {
         }
     }
 
-    fun createBooking(serviceId: Int, date: String, time: String, note: String? = null) {
+    fun fetchAvailableTimes(serviceId: Int) {
+        viewModelScope.launch {
+            _availableTimesState.value = AvailableTimesState.Loading
+            Log.d("ServiceViewModel", "Fetching available times for service ID: $serviceId")
+            val result = apiRepository.getServices() // Fetch all services and filter
+            result.onSuccess { services ->
+                val service = services.find { it.id == serviceId }
+                if (service != null) {
+                    val availableTimes = service.getAvailableTimes()
+                    Log.i("ServiceViewModel", "Calculated ${availableTimes.size} available times")
+                    _availableTimesState.value = AvailableTimesState.Success(availableTimes)
+                } else {
+                    _availableTimesState.value = AvailableTimesState.Error("Service not found")
+                }
+            }.onFailure { exception ->
+                Log.e("ServiceViewModel", "Available times fetch failed: ${exception.message}")
+                _availableTimesState.value = AvailableTimesState.Error(exception.message ?: "Failed to fetch available times")
+            }
+        }
+    }
+
+    fun createBooking(serviceId: Int, time: String, note: String? = null) {
         viewModelScope.launch {
             _bookingState.value = BookingState.Loading
-            Log.d("ServiceViewModel", "Creating booking for service ID: $serviceId")
-            val result = apiRepository.createBooking(serviceId, date, time, note)
+            Log.d("ServiceViewModel", "Creating booking for service ID: $serviceId, time: $time")
+            val result = apiRepository.createBooking(serviceId, time, note)
             result.onSuccess { booking ->
                 Log.i("ServiceViewModel", "Booking created successfully: ${booking.id}")
                 _bookingState.value = BookingState.Success(booking)

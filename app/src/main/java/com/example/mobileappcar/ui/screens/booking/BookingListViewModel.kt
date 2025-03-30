@@ -29,7 +29,7 @@ class BookingListViewModel : ViewModel() {
         viewModelScope.launch {
             _bookingsState.value = BookingsState.Loading
             Log.d("BookingListViewModel", "Fetching bookings")
-            val result: Result<List<Booking>> = apiRepository.getBookings() // Explicitly type result// Explicitly type result
+            val result: Result<List<Booking>> = apiRepository.getBookings()
             result.onSuccess { bookings ->
                 Log.i("BookingListViewModel", "API fetched ${bookings.size} bookings")
                 _bookingsState.value = BookingsState.Success(bookings)

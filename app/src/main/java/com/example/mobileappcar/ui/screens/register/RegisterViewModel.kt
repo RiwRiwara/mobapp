@@ -22,12 +22,12 @@ class RegisterViewModel : ViewModel() {
         data class Error(val message: String) : RegisterState()
     }
 
-    fun register(username: String, password: String, firstName: String, lastName: String, phone: String) {
+    fun register(username: String, password: String, email: String, firstName: String, lastName: String, phone: String) {
         viewModelScope.launch {
             _registerState.value = RegisterState.Loading
-            Log.d("RegisterViewModel", "Attempting registration for username: $username")
+            Log.d("RegisterViewModel", "Attempting registration for username: $username, email: $email")
 
-            val result = apiRepository.registerUser(username, password, "$username@example.com", firstName, lastName, phone)
+            val result = apiRepository.registerUser(username, password, email, firstName, lastName, phone)
             result.onSuccess { user ->
                 Log.i("RegisterViewModel", "API registration successful: ${user.username}")
                 _registerState.value = RegisterState.Success(user)
@@ -36,5 +36,9 @@ class RegisterViewModel : ViewModel() {
                 _registerState.value = RegisterState.Error(exception.message ?: "Registration failed")
             }
         }
+    }
+
+    fun setError(message: String) {
+        _registerState.value = RegisterState.Error(message)
     }
 }

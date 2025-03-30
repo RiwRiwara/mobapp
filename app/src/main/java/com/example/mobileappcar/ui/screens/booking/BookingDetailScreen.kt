@@ -30,7 +30,11 @@ import coil.compose.rememberAsyncImagePainter
 import kotlinx.coroutines.launch
 
 @Composable
-fun BookingDetailScreen(bookingId: Int, navController: NavHostController, modifier: Modifier = Modifier) {
+fun BookingDetailScreen(
+    bookingId: Int,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     val viewModel: BookingDetailViewModel = viewModel(factory = BookingDetailViewModelFactory(bookingId))
     val bookingState = viewModel.bookingState.collectAsState()
     val context = LocalContext.current
@@ -108,7 +112,7 @@ fun BookingDetailScreen(bookingId: Int, navController: NavHostController, modifi
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             DetailRow(label = "ID", value = "${booking.id}")
-                            DetailRow(label = "Date", value = "${booking.date} ${booking.time}")
+                            DetailRow(label = "Time", value = booking.time) // Updated to use time directly
                             DetailRow(label = "Status", value = booking.status)
                             DetailRow(label = "Service", value = booking.serviceName ?: "Unknown")
                             DetailRow(label = "Price", value = "${booking.price ?: "N/A"}")
@@ -235,7 +239,7 @@ fun uriToBase64(context: Context, uri: Uri): String {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bytes = inputStream?.readBytes() ?: throw IllegalStateException("Empty image data")
         inputStream.close()
-        val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP) // Use NO_WRAP to avoid newlines
+        val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
         Log.d("BookingDetailScreen", "Base64 generated: length=${base64.length}, startsWith=${base64.take(20)}")
         base64
     } catch (e: Exception) {
@@ -243,4 +247,3 @@ fun uriToBase64(context: Context, uri: Uri): String {
         throw e
     }
 }
-
