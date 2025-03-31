@@ -27,8 +27,6 @@ fun HomeScreen(navController: NavHostController, modifier: Modifier = Modifier) 
             Text("My Bookings")
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { navController.navigate("profile") }) {
-            Text("Profile")
-        }
+
     }
 }
