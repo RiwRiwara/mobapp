@@ -36,7 +36,14 @@ class RegisterViewModel : ViewModel() {
             _registerState.value = RegisterState.Loading
             Log.d("RegisterViewModel", "Attempting registration for username: $username, email: $email")
 
-            val result = apiRepository.registerUser(username, password, email, firstName, lastName, phone)
+            val result = apiRepository.registerUser(
+                username = username,
+                password = password,
+                email = email,
+                firstName = firstName,  // This will be converted
+                lastName = lastName,    // This will be converted
+                phone = phone
+            )
             result.onSuccess { user ->
                 Log.i("RegisterViewModel", "API registration successful: ${user.username}")
                 _registerState.value = RegisterState.Success(user)
@@ -45,7 +52,7 @@ class RegisterViewModel : ViewModel() {
                     is ApiException.HttpError -> {
                         when (exception.code) {
                             400 -> parseValidationErrors(exception.message) // Parse validation errors
-                            401 -> listOf("Unauthorized access. Please try again.") // Shouldn't happen for register, but included for safety
+                            401 -> listOf("Unauthorized access. Please try again.")
                             500 -> listOf("Registration failed due to server error. Please try again later.")
                             else -> listOf("An unexpected error occurred. Please try again.")
                         }
@@ -58,7 +65,6 @@ class RegisterViewModel : ViewModel() {
             }
         }
     }
-
     private fun validateInput(username: String, password: String, email: String, firstName: String, lastName: String, phone: String): List<String> {
         val errors = mutableListOf<String>()
 

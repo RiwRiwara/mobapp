@@ -3,11 +3,10 @@ data class RegisterRequest(
     val username: String,
     val password: String,
     val email: String,
-    val first_name: String,
-    val last_name: String,
+    val first_name: String,  // Match server’s snake_case
+    val last_name: String,   // Match server’s snake_case
     val phone: String
 )
-
 data class LoginRequest(
     val username: String,
     val password: String

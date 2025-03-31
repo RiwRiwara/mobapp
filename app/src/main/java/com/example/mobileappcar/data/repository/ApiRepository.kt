@@ -37,14 +37,17 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
         try {
             Result.success(call())
         } catch (e: HttpException) {
-            Result.failure(ApiException.HttpError(e.code(), e.message() ?: "Unknown HTTP error"))
+            val errorBody = e.response()?.errorBody()?.string() ?: "No error body"
+            Log.e("ApiRepository", "HTTP Error: ${e.code()} - ${e.message()}, Body: $errorBody")
+            Result.failure(ApiException.HttpError(e.code(), "HTTP ${e.code()}: ${e.message()} - $errorBody"))
         } catch (e: IOException) {
+            Log.e("ApiRepository", "Network Error: ${e.message}")
             Result.failure(ApiException.NetworkError(e.message ?: "Unknown network error"))
         } catch (e: Exception) {
+            Log.e("ApiRepository", "Unknown Error: ${e.message}")
             Result.failure(ApiException.UnknownError(e.message ?: "Unknown error"))
         }
     }
-
     private suspend fun <T> authenticatedApiCall(call: suspend (String) -> T): Result<T> = withContext(Dispatchers.IO) {
         getAuthToken()?.let { token ->
             apiCall { call(token) }
@@ -60,6 +63,7 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
         phone: String
     ): Result<User> = apiCall {
         val request = RegisterRequest(username, password, email, firstName, lastName, phone)
+        Log.d("ApiRepository", "Register request: $request")
         val response = apiService.registerUser(request)
         setAuthToken(response.token)
         User(
@@ -67,8 +71,8 @@ class ApiRepository(baseUrl: String = "http://10.0.2.2:3000/") {
             username = response.username,
             email = response.email,
             role = response.role,
-            firstName = response.first_name,
-            lastName = response.last_name,
+            firstName = response.first_name,  // Map server response to client model
+            lastName = response.last_name,    // Map server response to client model
             phone = response.phone,
             createdAt = response.created_at,
             password = null
