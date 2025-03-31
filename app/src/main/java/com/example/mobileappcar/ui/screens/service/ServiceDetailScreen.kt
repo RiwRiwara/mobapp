@@ -1,5 +1,6 @@
 package com.example.mobileappcar.ui.screens.service
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +28,9 @@ fun ServiceDetailScreen(
     val viewModel: ServiceViewModel = viewModel()
     val servicesState = viewModel.servicesState.collectAsState()
     val availableTimesState = viewModel.availableTimesState.collectAsState()
+    val bookingState = viewModel.bookingState.collectAsState()
     var selectedTime by remember { mutableStateOf<String?>(null) }
+    var note by remember { mutableStateOf("") }
 
     LaunchedEffect(serviceId) {
         viewModel.fetchAvailableTimes(serviceId)
@@ -37,7 +40,6 @@ fun ServiceDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    // Dynamically set the title based on the service name
                     when (val state = servicesState.value) {
                         is ServiceViewModel.ServicesState.Success -> {
                             val service = state.services.find { it.id == serviceId }
@@ -91,13 +93,13 @@ fun ServiceDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Available Times Selection
                         Text(
                             text = "Select a Time",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
+
                         when (val timesState = availableTimesState.value) {
                             is ServiceViewModel.AvailableTimesState.Loading -> {
                                 CircularProgressIndicator()
@@ -123,21 +125,63 @@ fun ServiceDetailScreen(
                                 )
                             }
                         }
+
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        // Note Input
+                        OutlinedTextField(
+                            value = note,
+                            onValueChange = { note = it },
+                            label = { Text("Note (optional)") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Confirm and Save Button
                         Button(
                             onClick = {
                                 selectedTime?.let { time ->
-                                    navController.navigate(
-                                        NavRoutes.BookingConfirm
-                                            .replace("{serviceId}", serviceId.toString())
-                                            .replace("{time}", time)
-                                    )
+                                    viewModel.createBooking(serviceId, time, if (note.isBlank()) null else note)
+                                } ?: run {
+                                    Log.w("ServiceDetailScreen", "No time selected")
                                 }
                             },
-                            enabled = selectedTime != null,
+                            enabled = selectedTime != null && bookingState.value !is ServiceViewModel.BookingState.Loading,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Confirm Booking")
+                            if (bookingState.value is ServiceViewModel.BookingState.Loading) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary)
+                            } else {
+                                Text("Confirm Booking")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Booking State Feedback
+                        when (val booking = bookingState.value) {
+                            is ServiceViewModel.BookingState.Success -> {
+                                Text(
+                                    text = "Booking Confirmed! ID: ${booking.booking.id}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                LaunchedEffect(booking) {
+                                    navController.navigate(NavRoutes.Bookings) {
+                                        popUpTo(NavRoutes.Services) { inclusive = false }
+                                    }
+                                }
+                            }
+                            is ServiceViewModel.BookingState.Error -> {
+                                Text(
+                                    text = "Error: ${booking.message}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            is ServiceViewModel.BookingState.Loading -> {}
+                            is ServiceViewModel.BookingState.Idle -> {}
                         }
                     } else {
                         Text("Service not found", color = MaterialTheme.colorScheme.error)

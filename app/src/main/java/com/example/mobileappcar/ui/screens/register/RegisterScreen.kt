@@ -40,83 +40,119 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Username
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = username.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && username.isEmpty(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("Username") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Email
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = email.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && email.isEmpty(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("Email") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Password
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = password.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && password.isEmpty(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("Password") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // First Name
         OutlinedTextField(
             value = firstName,
             onValueChange = { firstName = it },
             label = { Text("First Name") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = firstName.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && firstName.isEmpty(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("First name") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Last Name
         OutlinedTextField(
             value = lastName,
             onValueChange = { lastName = it },
             label = { Text("Last Name") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = lastName.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && lastName.isEmpty(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("Last name") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Phone
         OutlinedTextField(
             value = phone,
             onValueChange = { phone = it },
             label = { Text("Phone Number") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth(),
-            enabled = registerState !is RegisterViewModel.RegisterState.Loading,
-            isError = phone.isBlank() && registerState is RegisterViewModel.RegisterState.Error
+            isError = registerState is RegisterViewModel.RegisterState.Error && phone.isNotEmpty() && !android.util.Patterns.PHONE.matcher(phone).matches(),
+            supportingText = {
+                if (registerState is RegisterViewModel.RegisterState.Error) {
+                    val errors = (registerState as RegisterViewModel.RegisterState.Error).messages
+                    errors.firstOrNull { it.contains("phone") }?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+            },
+            enabled = registerState !is RegisterViewModel.RegisterState.Loading
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {
-                if (username.isNotBlank() && password.isNotBlank() && email.isNotBlank() && firstName.isNotBlank() && lastName.isNotBlank() && phone.isNotBlank()) {
-                    viewModel.register(username, password, email, firstName, lastName, phone)
-                } else {
-                    viewModel.setError("All fields are required.")
-                }
-            },
+            onClick = { viewModel.register(username, password, email, firstName, lastName, phone) },
             modifier = Modifier.fillMaxWidth().height(50.dp),
             enabled = registerState !is RegisterViewModel.RegisterState.Loading
         ) {
@@ -139,12 +175,15 @@ fun RegisterScreen(navController: NavHostController, modifier: Modifier = Modifi
 
         when (val state = registerState) {
             is RegisterViewModel.RegisterState.Error -> {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Column {
+                    state.messages.forEach { message ->
+                        Text(
+                            text = message,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                }
             }
             is RegisterViewModel.RegisterState.Success -> {
                 LaunchedEffect(state) {

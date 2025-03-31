@@ -8,7 +8,6 @@ object NavRoutes {
     const val BookingDetail = "booking_detail/{bookingId}"
     const val Services = "services"
     const val ServiceDetail = "service_detail/{serviceId}"
-    const val BookingConfirm = "booking_confirm/{serviceId}/{time}"
-    const val Payment = "payment/{bookingId}" // Added Payment route
+    const val Payment = "payment/{bookingId}"
     const val Profile = "profile"
 }

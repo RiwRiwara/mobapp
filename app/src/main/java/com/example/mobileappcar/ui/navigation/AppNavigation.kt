@@ -7,7 +7,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.mobileappcar.ui.screens.booking.BookingConfirmScreen
 import com.example.mobileappcar.ui.screens.booking.BookingDetailScreen
 import com.example.mobileappcar.ui.screens.booking.BookingListScreen
 import com.example.mobileappcar.ui.screens.home.HomeScreen
@@ -49,21 +48,6 @@ fun AppNavigation(
             ServiceDetailScreen(navController, serviceId, modifier)
         }
         composable(
-            route = NavRoutes.BookingConfirm,
-            arguments = listOf(
-                navArgument("serviceId") { type = NavType.IntType },
-                navArgument("time") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                }
-            )
-        ) { backStackEntry ->
-            val serviceId = backStackEntry.arguments?.getInt("serviceId") ?: 0
-            val time = backStackEntry.arguments?.getString("time")
-            BookingConfirmScreen(navController, serviceId, time, modifier)
-        }
-        composable(
             route = NavRoutes.Payment,
             arguments = listOf(navArgument("bookingId") { type = NavType.IntType })
         ) { backStackEntry ->
@@ -73,4 +57,3 @@ fun AppNavigation(
         composable(NavRoutes.Profile) { ProfileScreen(navController, modifier) }
     }
 }
-

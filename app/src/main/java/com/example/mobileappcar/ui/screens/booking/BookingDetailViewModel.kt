@@ -42,12 +42,12 @@ class BookingDetailViewModel(private val bookingId: Int) : ViewModel() {
         bookingId: Int,
         amount: Float,
         paymentMethod: String,
-        image: String
+        image: String? // Image is optional; if provided, status will be "in_progress"
     ): Result<Payment> {
         val result = apiRepository.createPayment(bookingId, amount, paymentMethod, null, image)
         result.onSuccess { payment ->
             Log.d("BookingDetailViewModel", "Payment created: $payment")
-            fetchBookingDetails()
+            fetchBookingDetails() // Refresh booking details to reflect "in_progress" status
         }.onFailure { exception ->
             Log.e("BookingDetailViewModel", "Payment creation failed", exception)
         }

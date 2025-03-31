@@ -17,7 +17,7 @@ import androidx.navigation.NavHostController
 fun LoginScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    onLoginSuccess: (Boolean) -> Unit = {} // Callback to update login state
+    onLoginSuccess: (Boolean) -> Unit = {}
 ) {
     val viewModel: LoginViewModel = viewModel()
     var username by remember { mutableStateOf("") }
@@ -75,7 +75,7 @@ fun LoginScreen(
 
         TextButton(
             onClick = { navController.navigate("register") },
-            modifier = Modifier.align(Alignment.End),
+            modifier = Modifier.align(Alignment.End).padding(end = 16.dp),
             enabled = loginState !is LoginViewModel.LoginState.Loading
         ) {
             Text("Don’t have an account? Register")
@@ -84,15 +84,22 @@ fun LoginScreen(
         when (val state = loginState) {
             is LoginViewModel.LoginState.Success -> {
                 LaunchedEffect(state) {
-                    onLoginSuccess(true) // Notify login success
+                    onLoginSuccess(true)
                     navController.navigate("home") {
                         popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
             }
             is LoginViewModel.LoginState.Error -> {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                Column {
+                    state.messages.forEach { message ->
+                        Text(
+                            text = message,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
+                }
             }
             else -> {}
         }

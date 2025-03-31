@@ -1,9 +1,12 @@
 package com.example.mobileappcar.ui.screens.booking
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,24 +23,37 @@ import com.example.mobileappcar.ui.screens.service.ServiceViewModel
 fun BookingConfirmScreen(
     navController: NavHostController,
     serviceId: Int,
-    time: String? = null, // Updated from timeSlotId to time string
+    time: String?,
     modifier: Modifier = Modifier
 ) {
     val viewModel: ServiceViewModel = viewModel()
     val bookingState = viewModel.bookingState.collectAsState()
-    val availableTimesState = viewModel.availableTimesState.collectAsState()
-    var selectedTime by remember { mutableStateOf<String?>(time) } // Pre-select time if passed
     var note by remember { mutableStateOf("") }
 
-    // Fetch available times when screen loads
-    LaunchedEffect(serviceId) {
-        viewModel.fetchAvailableTimes(serviceId)
+    // Pre-select the time passed from ServiceDetailScreen, default to null if not provided
+    var selectedTime by remember { mutableStateOf(time) }
+
+    if (selectedTime == null) {
+        Log.w("BookingConfirmScreen", "No time provided in navigation")
+        // Optionally navigate back or show an error
+        LaunchedEffect(Unit) {
+            navController.popBackStack()
+        }
+        return
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Confirm Your Booking") }
+                title = { Text("Confirm Your Booking") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowLeft,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -57,38 +73,16 @@ fun BookingConfirmScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Available Times Selection
+            // Display selected service and time
             Text(
-                text = "Select a Time",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                text = "Service ID: $serviceId",
+                style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(8.dp))
-            when (val state = availableTimesState.value) {
-                is ServiceViewModel.AvailableTimesState.Loading -> {
-                    CircularProgressIndicator()
-                }
-                is ServiceViewModel.AvailableTimesState.Success -> {
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 200.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.availableTimes) { availableTime ->
-                            TimeItem(
-                                time = availableTime,
-                                isSelected = selectedTime == availableTime,
-                                onSelect = { selectedTime = availableTime }
-                            )
-                        }
-                    }
-                }
-                is ServiceViewModel.AvailableTimesState.Error -> {
-                    Text(
-                        text = "Error loading times: ${state.message}",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
+            Text(
+                text = "Selected Time: $selectedTime",
+                style = MaterialTheme.typography.bodyLarge
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -102,17 +96,19 @@ fun BookingConfirmScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Confirm Button
+            // Confirm and Save Button
             Button(
                 onClick = {
                     selectedTime?.let { time ->
                         viewModel.createBooking(serviceId, time, if (note.isBlank()) null else note)
+                    } ?: run {
+                        Log.e("BookingConfirmScreen", "Selected time is null when confirming")
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = selectedTime != null
             ) {
-                Text("Confirm Booking")
+                Text("Save Booking")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -146,4 +142,3 @@ fun BookingConfirmScreen(
         }
     }
 }
-
