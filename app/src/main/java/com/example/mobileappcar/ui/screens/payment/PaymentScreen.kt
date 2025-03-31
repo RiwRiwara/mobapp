@@ -118,14 +118,25 @@ fun PaymentScreen(
                 }
             }
 
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Amount (THB)") },
-                modifier = Modifier.fillMaxWidth(),
-                isError = amount.isNotEmpty() && amount.toFloatOrNull() == null,
-                enabled = booking?.paymentId == null || booking?.paymentStatus != "completed"
-            )
+            // Display service price instead of manual input
+            booking?.price?.let { servicePrice ->
+                Text(
+                    text = "Service Price: ${servicePrice} THB",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+                // Set amount to service price
+                LaunchedEffect(servicePrice) {
+                    amount = servicePrice.toString()
+                }
+            } ?: run {
+                Text(
+                    text = "Price information not available",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -209,8 +220,7 @@ fun PaymentScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = amount.isNotEmpty() &&
-                        amount.toFloatOrNull() != null &&
+                enabled = booking?.price != null &&
                         (paymentMethod != "QR Code" || imageUri != null) &&
                         (booking?.paymentId == null || booking?.paymentStatus != "completed")
             ) {

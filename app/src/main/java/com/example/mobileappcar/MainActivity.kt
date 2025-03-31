@@ -117,13 +117,6 @@ fun AppTopBar(
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-                IconButton(onClick = { /* Handle notifications */ }) {
-                    Icon(
-                        imageVector = Icons.Filled.Notifications,
-                        contentDescription = "Notifications",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors( // Changed to topAppBarColors
@@ -169,6 +162,17 @@ fun NavigationDrawerContent(
         )
 
         NavigationDrawerItem(
+            icon = { Icon(Icons.Filled.Build, contentDescription = "Services") },
+            label = { Text("Our Services") },
+            selected = navController.currentDestination?.route == NavRoutes.Services,
+            onClick = {
+                navController.navigate(NavRoutes.Services)
+                scope.launch { drawerState.close() }
+            },
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        NavigationDrawerItem(
             icon = { Icon(Icons.Filled.AccountBox, contentDescription = "Bookings") },
             label = { Text("My Bookings") },
             selected = navController.currentDestination?.route == NavRoutes.Bookings,
@@ -179,16 +183,7 @@ fun NavigationDrawerContent(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Build, contentDescription = "Services") },
-            label = { Text("Our Services") },
-            selected = navController.currentDestination?.route == NavRoutes.Services,
-            onClick = {
-                navController.navigate(NavRoutes.Services)
-                scope.launch { drawerState.close() }
-            },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
+
 
         // Conditional Items (Login/Register)
         if (!isLoggedIn) {

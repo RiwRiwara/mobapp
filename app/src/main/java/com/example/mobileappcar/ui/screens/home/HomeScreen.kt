@@ -20,11 +20,11 @@ fun HomeScreen(navController: NavHostController, modifier: Modifier = Modifier) 
         Text(text = "Welcome to Car Spa")
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { navController.navigate("services") }) {
-            Text("Book a Service")
+            Text("Our Services")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { navController.navigate("bookings") }) {
-            Text("View Bookings")
+            Text("My Bookings")
         }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { navController.navigate("profile") }) {
